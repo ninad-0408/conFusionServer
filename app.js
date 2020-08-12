@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/usersRouter');
 var dishRouter = require('./routes/dishRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var promoRouter = require('./routes/promoRouter');
@@ -42,53 +42,29 @@ app.use(session({
   store: new FileStore()
 }));
 
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 function auth(req,res,next) {
   console.log(req.session);
 
-  if(!req.session.user){
-    var authHeader = req.headers.authorization;
-
-    if(!authHeader){
-      var err = new Error("You are not authenticated.");
-  
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
+  if(!req.session.user) {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
       return next(err);
-    }
-    
-    var auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
-  
-    var username = auth[0];
-    var password = auth[1];
-  
-    if(username === 'admin' && password === 'password'){
-      req.session.user = 'admin';
+  }
+  else {
+    if (req.session.user === 'authenticated') {
       next();
     }
-    else{
-      var err = new Error("You are not authenticated.");
-  
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
-      return next(err);
-    }
-  }  
-
-  else{
-    if(req.session.user === 'admin'){
-      next();
-    }
-    else{
-      var err = new Error("You are not authenticated.");
-  
-      err.status = 401;
+    else {
+      var err = new Error('You are not authenticated!');
+      err.status = 403;
       return next(err);
     }
   }
 }
 app.use(auth);
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
