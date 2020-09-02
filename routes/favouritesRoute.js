@@ -5,11 +5,11 @@ const authenticate = require('../authenticate');
 const cors = require('./cors');
 const Favorites = require('../models/favourites');
 
-const favoriteRouter = express.Router();
+const favouritesRouter = express.Router();
 
-favoriteRouter.use(bodyParser.json());
+favouritesRouter.use(bodyParser.json());
 
-favoriteRouter.route('/')
+favouritesRouter.route('/')
     .options(cors.corsWithOptions, (req, res) => { res.setStatus = 200; })
     .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
         Favorites.findOne({ user: req.user._id })
@@ -68,7 +68,7 @@ favoriteRouter.route('/')
             .catch((err) => next(err));
     });
 
-favoriteRouter.route('/:dishId')
+favouritesRouter.route('/:dishId')
     .options(cors.corsWithOptions, (req, res) => { res.setStatus = 200; })
     .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
         res.statusCode = 403;
@@ -136,4 +136,4 @@ favoriteRouter.route('/:dishId')
             .catch((err) => next(err));
     });
 
-module.exports = favoritesRouter;
+module.exports = favouritesRouter;
